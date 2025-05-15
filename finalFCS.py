@@ -157,21 +157,22 @@ def Sl(H,Ls,Ll,rho0,chi,t):
 #another way calculating the largest real part of L(\chi)
 def Lambdachi(H,Ls,Ll,chi):
     Lchi = FCS(H,Ls,Ll,chi)
+    print(Lchi)
     #we diagonalize L(chi)
     evals, evecs = eigh(Lchi )
     reals = []
     for re in evals:
-        reals.append(re.real)
-    #We choose the real part an use the largest
-
-    return max(reals)
+        reals.append(re.real) 
+    #We choose the index of the largest real part
+    n = reals.index(max(reals))
+    return evals[n]
     
 def Nl(H,Ls,Ll):
     #here we need to derivate around chi
-    N = 10
+    N = 30
     #here there is error
     #here we calculate the derivate of the largest real part
-    chis = np.linspace(0,0.005,N)
+    chis = np.linspace(0,0.5,N)
     Ss = []
     for chi in chis:
         L = Lambdachi(H,Ls,Ll,chi)
@@ -208,7 +209,8 @@ tot = Lambdachi(H,Ls,Ll,chi)
 print(tot)
 
 
-Num = 2000
+#Num = 8000
+Num = 3 
 gss = np.linspace(0.,1,Num)
 gaux = []
 Il = []
@@ -251,4 +253,3 @@ for i in range(Num):
     #archivo.write(str(ys[i]))
     archivo.write( format_str.format(I2l[i]))
     archivo.write("\n")
-
