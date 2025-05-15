@@ -1,19 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.linalg import expm
-from scipy import integrate
-from scipy.linalg import logm 
-from scipy import integrate
-import cmath
-import os
-
 #here we better the codes i had of FCS
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
+from scipy.linalg import eigh
 from scipy import integrate
 from scipy.linalg import logm 
-from scipy import integrate
 import cmath
 import os
 
@@ -56,6 +47,16 @@ def derivada(t,x):
         ts.append(t[i])
 
     return ts,der  
+
+def secondd(t,x):
+    N = np.shape(t)[0]
+    second = []
+    ts = []
+    for i in range(1,N-1):
+        derivada = (x[i+1] - 2*x[i] + x[i-1] )/(t[i+1] - t[i])**2
+        second.append(derivada)
+        ts.append(t[i])
+    return ts,second
 
 def quadrature(x1,y1):
     n = len(x1)-1
@@ -136,8 +137,8 @@ def FCSLiou(H,Ls,chi,hbar = 1):
         n+=1    
     return superL
 
-def FCS(H,Ls,Lr,Ll,chi,beta):
-    tot = Liouvillian(H,Ls) + FCSLiou(H,Ll,chi) + FCSLiou(H,Lr,beta)
+def FCS(H,Ls,Ll,chi):
+    tot = Liouvillian(H,Ls) + FCSLiou(H,Ll,chi) 
     return tot
 
 def Propagate(rho0,superop,t):
@@ -147,12 +148,37 @@ def Propagate(rho0,superop,t):
     return np.reshape( vec_rho_t, (d,d) )
 
 #Heres the cumulants of the net number of transported electrons (we can do it with energy)
-def Sl(H,Ls,Lr,Ll,rho0,chi,t):
-    FC = FCS(H,Ls,Lr,Ll,chi,0)
+def Sl(H,Ls,Ll,rho0,chi,t):
+    FC = FCS(H,Ls,Ll,chi)
     Tot = Propagate(rho0,FC,t)
     S = np.log(np.trace(Tot))
     return S
 
+#another way calculating the largest real part of L(\chi)
+def Lambdachi(H,Ls,Ll,chi):
+    Lchi = FCS(H,Ls,Ll,chi)
+    #we diagonalize L(chi)
+    evals, evecs = eigh(Lchi )
+    reals = []
+    for re in evals:
+        reals.append(re.real)
+    #We choose the real part an use the largest
+
+    return max(reals)
+    
+def Nl(H,Ls,Ll):
+    #here we need to derivate around chi
+    N = 10
+    #here there is error
+    #here we calculate the derivate of the largest real part
+    chis = np.linspace(0,0.005,N)
+    Ss = []
+    for chi in chis:
+        L = Lambdachi(H,Ls,Ll,chi)
+        Ss.append(L)
+    chisf,dS = derivada(chis,Ss)
+    chisff,ddS = secondd(chis,Ss)
+    return -1j*dS[0],-ddS[0]
 
 def Hamiltonian(eps,U,g):
     Ns = np.matmul(dsdag,ds) 
@@ -162,4 +188,67 @@ def Hamiltonian(eps,U,g):
     a3 = U* (np.matmul(Ns,Nd)  )
     return a1+a2+a3
 
+
+U0 =0.
+g0 = 0.005
+
+eV = 6.5
+mus1 = eV/2
+mud1 = -eV/2
+mul = eV/20
+
+betas,betad,betal = 1,1,1
+gs,gd,gl = 1/100,1/100,0
+Ls = Dissipator(0,U0,mus1,mud1,mul,betas,betad,betal,gs,gd,gl)
+Ll = Ds(0,U0,mus1,betas,gs)
+Lr = Dd(0,U0,mud1,betad,gd)
+H = Hamiltonian(0,U0,g0)
+chi = 0.2
+tot = Lambdachi(H,Ls,Ll,chi)
+print(tot)
+
+
+Num = 2000
+gss = np.linspace(0.,1,Num)
+gaux = []
+Il = []
+I2l = []
+for g in gss:
+    gau = g/gs
+    H0 = Hamiltonian(0,U0,g)
+    gaux.append(gau)
+    Il0,I2l0 = Nl(H0,Ls,Ll) 
+    #print(Il0/gs)  
+    #print(g)
+    Il.append(Il0.real/gs)
+    I2l.append(I2l0.real/gs)
+    #print(g)
+
+plt.plot( gaux,Il)
+plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)     
+plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xscale("log")
+plt.show()
+plt.plot( gaux,I2l)
+plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
+plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xscale("log")
+plt.show()
+
+
+archivo = open("final","w")
+decimal_places = 7
+total_width = 8
+format_str = f"{{:.{decimal_places}f}}" 
+#format_str = f"{{:{total_width}.{decimal_places}f}}"
+for i in range(Num):
+    archivo.write( format_str.format(gaux[i])) #guarda el grado del nodo
+    #archivo.write(str(xs[i])) 
+    archivo.write(" ") 
+    #archivo.write(str(ys[i]))
+    archivo.write( format_str.format(Il[i]))
+    archivo.write(" ") 
+    #archivo.write(str(ys[i]))
+    archivo.write( format_str.format(I2l[i]))
+    archivo.write("\n")
 
