@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
-from scipy.linalg import eigh
+from scipy.linalg import eig
 from scipy import integrate
 from scipy.linalg import logm 
 import cmath
@@ -157,9 +157,9 @@ def Sl(H,Ls,Ll,rho0,chi,t):
 #another way calculating the largest real part of L(\chi)
 def Lambdachi(H,Ls,Ll,chi):
     Lchi = FCS(H,Ls,Ll,chi)
-    print(Lchi)
+    #print(Lchi)
     #we diagonalize L(chi)
-    evals, evecs = eigh(Lchi )
+    evals, evecs = eig(Lchi )
     reals = []
     for re in evals:
         reals.append(re.real) 
@@ -169,13 +169,14 @@ def Lambdachi(H,Ls,Ll,chi):
     
 def Nl(H,Ls,Ll):
     #here we need to derivate around chi
-    N = 30
+    N = 10
     #here there is error
     #here we calculate the derivate of the largest real part
-    chis = np.linspace(0,0.5,N)
+    chis = np.linspace(0,0.05,N)
     Ss = []
     for chi in chis:
         L = Lambdachi(H,Ls,Ll,chi)
+        #print(L.imag)
         Ss.append(L)
     chisf,dS = derivada(chis,Ss)
     chisff,ddS = secondd(chis,Ss)
@@ -206,11 +207,11 @@ Lr = Dd(0,U0,mud1,betad,gd)
 H = Hamiltonian(0,U0,g0)
 chi = 0.2
 tot = Lambdachi(H,Ls,Ll,chi)
-print(tot)
+#print(tot)
 
 
 #Num = 8000
-Num = 3 
+Num = 8000 
 gss = np.linspace(0.,1,Num)
 gaux = []
 Il = []
