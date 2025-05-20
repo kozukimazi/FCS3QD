@@ -234,8 +234,8 @@ rho0 = np.array([[1/8,0,0,0,0,0,0,0],
 
 
 #Num = 8000
-Num = 200 
-eVs = np.linspace(0,1000,2000)
+Num = 2000 
+eVs = np.linspace(0,1000,Num)
 evn = []
 Il = []
 I2l = []
@@ -278,13 +278,14 @@ plt.xlabel(r'$g/\gamma$',fontsize = 20)
 plt.show()
 
 #Num = 8000
-Num = 8000 
-gss = np.linspace(0.,1,Num)
+Num0 = 8000 
+gss = np.linspace(0.,1,Num0)
 gaux = []
 Il0 = []
 I2l0 = []
 
 for g in gss:
+    print(g)
     mud0 = 2
     U00 = 40 #10
     #mud0 = 1-U00/2
@@ -296,7 +297,7 @@ for g in gss:
     #Probar condicion (U00/E0)<<1,Strasberg
     E0 = 0
     Ls0 = Dissipator(E0,Ed0,U00,Uf0,eV/2,-eV/2,mud0,betal,betar,betad,gl,glU,gr,grU,gd,gdU)
-    H0 = Hamiltonian(E0,Ed0,U00,Uf0,g0)
+    H0 = Hamiltonian(E0,Ed0,U00,Uf0,g)
     superop0 = Liouvillian(H0,Ls0)
     Ll0 = Dl(E0,U00,Uf0,eV/2,betal,gl,glU)
     Lr0 = Dr(E0,U00,Uf0,-eV/2,betar,gr,grU)
@@ -306,8 +307,21 @@ for g in gss:
     #print(g)
     Il0.append(Il0f.real/gl)
     I2l0.append(I2l0f.real/gl)
+    gaux.append(g/gl)
 
-archivo = open("final","w")
+plt.plot( gaux,Il0)
+plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)     
+plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xscale("log")
+plt.show()
+plt.plot( gaux,I2l0)
+plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
+plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xscale("log")
+plt.show()
+
+
+archivo = open("3QDFCS","w")
 decimal_places = 7
 total_width = 8
 format_str = f"{{:.{decimal_places}f}}" 
