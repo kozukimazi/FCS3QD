@@ -1,4 +1,5 @@
 #here we better the codes i had of FCS
+#this is what i use 23/6
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
@@ -206,7 +207,7 @@ def Hamiltonian(E,Ed,U,Uf,g):
 
 U0 =0.
 g0 = 0.005
-
+#g0 = 0.001
 eV = 6.5
 mus1 = eV/2
 mud1 = -eV/2
@@ -214,8 +215,8 @@ mul = eV/20
 
 betar,betad,betal = 1/100,5/10,1/100
 #datos maquina
-gr,grU = (1/100)*(1/6), 1/100
-gl,glU = 1/100, (1/100)*(1/6)
+gr,grU = (1/100)*(1/2), 1/100
+gl,glU = 1/100, (1/100)*(1/2)
 gd,gdU = 1/50,1/50 
 
 #revisar la base
@@ -268,15 +269,18 @@ for ev in eVs:
 
 plt.plot( evn,Il)
 plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)     
-plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xlabel(r'$eV/T$',fontsize = 20)
 #plt.xscale("log")
 plt.show()
 plt.plot( evn,I2l)
 plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
-plt.xlabel(r'$g/\gamma$',fontsize = 20)
+plt.xlabel(r'$eV/T$',fontsize = 20)
 #plt.xscale("log")
 plt.show()
 
+plt.plot( evn,Il)
+plt.plot( evn,I2l)
+plt.show()
 #Num = 8000
 Num0 = 8000 
 gss = np.linspace(0.,1,Num0)
@@ -314,10 +318,15 @@ plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)
 plt.xlabel(r'$g/\gamma$',fontsize = 20)
 plt.xscale("log")
 plt.show()
+
 plt.plot( gaux,I2l0)
 plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
 plt.xlabel(r'$g/\gamma$',fontsize = 20)
 plt.xscale("log")
+plt.show()
+
+plt.plot( gaux,Il0)
+plt.plot( gaux,I2l0)
 plt.show()
 
 

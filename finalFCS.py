@@ -192,7 +192,7 @@ def Hamiltonian(eps,U,g):
 
 
 U0 =0.
-g0 = 0.005
+g0 = 5/1000
 
 eV = 6.5
 mus1 = eV/2
