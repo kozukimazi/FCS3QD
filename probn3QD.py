@@ -1,13 +1,10 @@
-#here we better the codes i had of FCS
-#this is what i use 23/6
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import expm
-from scipy.linalg import eig
 from scipy import integrate
-from scipy.linalg import logm 
-import cmath
-import os
+
+#aun no esta listo 24/6
+#here we obtain the P(n,t) for the 3QD
 
 sigmax = np.array([[0,1],
                    [1,0]])
@@ -192,7 +189,7 @@ def Nl(H,Ls,Ll):
     Ss = []
     for chi in chis:
         L = Lambdachi(H,Ls,Ll,chi)
-        print(L.imag)
+        #print(L.imag)
         Ss.append(L)
     chisf,dS = derivada(chis,Ss)
     chisff,ddS = secondd(chis,Ss)
@@ -205,143 +202,3 @@ def Hamiltonian(E,Ed,U,Uf,g):
     return a1+a2+a3
 
 
-U0 =0.
-g0 = 0.005
-#g0 = 0.001
-eV = 6.5
-mus1 = eV/2
-mud1 = -eV/2
-mul = eV/20
-
-betar,betad,betal = 1/100,5/10,1/100
-#datos maquina
-gr,grU = (1/100)*(1/2), 1/100
-gl,glU = 1/100, (1/100)*(1/2)
-gd,gdU = 1/50,1/50 
-
-#revisar la base
-#|1,1,1>,|1,1,0>,|1,0,1>,|1,0,0>,|0,1,1>,|0,1,0>,|0,0,1>,|0,0,0>
-alp,alp2,alp3,alp4,alp5 = 0.,0.,0.0,0.0,0.
-a,b,c,d = 1j*alp,1j*alp2,1j*alp3,1j*alp4
-
-rho0 = np.array([[1/8,0,0,0,0,0,0,0],
-                 [0,1/8,a,0,d,0,0,0],
-                 [0,-a,1/8,0,0,0,0,0],
-                 [0,0,0,1/8,0,0,b,0],
-                 [0,-d,0,0,1/8,0,0,0],
-                 [0,0,0,0,0,1/8,c,0],
-                 [0,0,0,-b,0,-c,1/8,0],
-                 [0,0,0,0,0,0,0,1/8]])
-
-
-#Num = 8000
-Num = 2000 
-eVs = np.linspace(0,1000,Num)
-evn = []
-Il = []
-I2l = []
-gs= 5/1000
-for ev in eVs:
-    print(ev)
-    evn.append(ev*betal)
-    mud0 = 2
-    U00 = 40 #10
-    #mud0 = 1-U00/2
-    #Con Ed0 = mud0 -U00/2,E0=4 hay flujo de energia pero un orden menor al de
-    #flujo de informacion
-    #Ed0 = 1
-    Ed0 = mud0 -U00/2
-    Uf0 = 500 #50
-    #Probar condicion (U00/E0)<<1,Strasberg
-    E0 = 0
-    Ls0 = Dissipator(E0,Ed0,U00,Uf0,ev/2,-ev/2,mud0,betal,betar,betad,gl,glU,gr,grU,gd,gdU)
-    H0 = Hamiltonian(E0,Ed0,U00,Uf0,g0)
-    superop0 = Liouvillian(H0,Ls0)
-    Ll0 = Dl(E0,U00,Uf0,ev/2,betal,gl,glU)
-    Lr0 = Dr(E0,U00,Uf0,-ev/2,betar,gr,grU)
-    Ld0 = Dd(Ed0,U00,mud0,betad,gd,gdU)
-    Il0,I2l0 = Nl(H0,Ls0,Ll0) 
-    #print(Il0/gs)  
-    #print(g)
-    Il.append(Il0.real/gl)
-    I2l.append(I2l0.real/gl)
-    #print(g)
-
-plt.plot( evn,Il)
-plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)     
-plt.xlabel(r'$eV/T$',fontsize = 20)
-#plt.xscale("log")
-plt.show()
-plt.plot( evn,I2l)
-plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
-plt.xlabel(r'$eV/T$',fontsize = 20)
-#plt.xscale("log")
-plt.show()
-
-plt.plot( evn,Il)
-plt.plot( evn,I2l)
-plt.show()
-#Num = 8000
-Num0 = 8000 
-gss = np.linspace(0.,1,Num0)
-gaux = []
-Il0 = []
-I2l0 = []
-
-for g in gss:
-    print(g)
-    mud0 = 2
-    U00 = 40 #10
-    #mud0 = 1-U00/2
-    #Con Ed0 = mud0 -U00/2,E0=4 hay flujo de energia pero un orden menor al de
-    #flujo de informacion
-    #Ed0 = 1
-    Ed0 = mud0 -U00/2
-    Uf0 = 500 #50
-    #Probar condicion (U00/E0)<<1,Strasberg
-    E0 = 0
-    Ls0 = Dissipator(E0,Ed0,U00,Uf0,eV/2,-eV/2,mud0,betal,betar,betad,gl,glU,gr,grU,gd,gdU)
-    H0 = Hamiltonian(E0,Ed0,U00,Uf0,g)
-    superop0 = Liouvillian(H0,Ls0)
-    Ll0 = Dl(E0,U00,Uf0,eV/2,betal,gl,glU)
-    Lr0 = Dr(E0,U00,Uf0,-eV/2,betar,gr,grU)
-    Ld0 = Dd(Ed0,U00,mud0,betad,gd,gdU)
-    Il0f,I2l0f = Nl(H0,Ls0,Ll0) 
-    #print(Il0/gs)  
-    #print(g)
-    Il0.append(Il0f.real/gl)
-    I2l0.append(I2l0f.real/gl)
-    gaux.append(g/gl)
-
-plt.plot( gaux,Il0)
-plt.ylabel(r'$I_{L}/\gamma$',fontsize = 20)     
-plt.xlabel(r'$g/\gamma$',fontsize = 20)
-plt.xscale("log")
-plt.show()
-
-plt.plot( gaux,I2l0)
-plt.ylabel(r'$\langle \langle I^{2}_{L} \rangle \rangle/\gamma$',fontsize = 20)     
-plt.xlabel(r'$g/\gamma$',fontsize = 20)
-plt.xscale("log")
-plt.show()
-
-plt.plot( gaux,Il0)
-plt.plot( gaux,I2l0)
-plt.show()
-
-
-archivo = open("3QDFCS","w")
-decimal_places = 7
-total_width = 8
-format_str = f"{{:.{decimal_places}f}}" 
-#format_str = f"{{:{total_width}.{decimal_places}f}}"
-for i in range(Num):
-    archivo.write( format_str.format(evn[i])) #guarda el grado del nodo
-    #archivo.write(str(xs[i])) 
-    archivo.write(" ") 
-    #archivo.write(str(ys[i]))
-    archivo.write( format_str.format(Il[i]))
-    archivo.write(" ") 
-    #archivo.write(str(ys[i]))
-    archivo.write( format_str.format(I2l[i]))
-    archivo.write("\n")

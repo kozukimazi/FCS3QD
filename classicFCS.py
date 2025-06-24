@@ -9,7 +9,6 @@ from scipy import integrate
 import cmath
 import os
 
-
 def anticonmutador(A,B):
     return np.matmul(A,B) + np.matmul(B,A)
 
@@ -92,6 +91,7 @@ v101 = -totdl @ v00
 v011 = totdr @ v00
 v111 = totf @ v00
 
+#000,100,010,001,110,101,011,111
 basis = np.array([v00,v100,v010,v001,v110,v101,v011,v111])
 
 #perturbation superoperator
@@ -196,7 +196,8 @@ def Drazinspectral(L0,tol):
         #print(w[i])
         if (abs(w[i])>tol):
             #print(type(w[i]))            
-            L0_D += np.outer(eigenr[:, i], eigenl[:, i])/w[i]
+            #aquiii ojo con np.conj
+            L0_D += np.outer(eigenr[:, i], np.conj(eigenl[:, i]))/w[i]
 
     return L0_D
 
@@ -394,17 +395,18 @@ def ratet(Wl,Wr,Wlr,Wd):
 
     return Wl +Wr + Wlr + Wd
 
+#here ew have to modify, it has a imaginary part
 def Wf(W):
-    W0l,Wl0,Wluf,Wufl = W[63,27].real,W[27,63].real,W[45,9].real,W[9,45].real
-    Wlu,Wul,Wlu2,Wu2l = W[54,18].real,W[18,54].real,W[36,0].real,W[0,36].real
+    W0l,Wl0,Wluf,Wufl = W[63,27],W[27,63],W[45,9],W[9,45]
+    Wlu,Wul,Wlu2,Wu2l = W[54,18],W[18,54],W[36,0],W[0,36]
 
-    W0r,Wr0,Wruf,Wufr = W[63,45].real,W[45,63].real,W[27,9].real,W[9,27].real
-    Wru,Wur,Wru2,Wu2r = W[54,36].real,W[36,54].real,W[18,0].real,W[0,18].real
+    W0r,Wr0,Wruf,Wufr = W[63,45],W[45,63],W[27,9],W[9,27]
+    Wru,Wur,Wru2,Wu2r = W[54,36],W[36,54],W[18,0],W[0,18]
 
-    W0d,Wd0,Wfu2,Wu2f = W[63,54].real,W[54,63].real,W[0,9].real,W[9,0].real
-    Wru,Wur,Wlu,Wul = W[45,36].real,W[36,45].real,W[27,18].real,W[18,27].real    
+    W0d,Wd0,Wfu2,Wu2f = W[63,54],W[54,63],W[0,9],W[9,0]
+    Wru,Wur,Wlu,Wul = W[45,36],W[36,45],W[27,18],W[18,27]    
 
-    Wlr,Wrl,Wlru,Wrlu = W[27,45].real,W[45,27].real,W[18,36].real,W[36,18].real
+    Wlr,Wrl,Wlru,Wrlu = W[27,45],W[45,27],W[18,36],W[36,18]
     Wl = ratel(W0l,Wl0,Wluf,Wufl,Wlu,Wul,Wu2l,Wlu2)
     Wr = rater(W0r,Wr0,Wruf,Wufr,Wru,Wur,Wu2r,Wru2)
     WLR = rateg(Wlr,Wrl,Wlru,Wrlu)
@@ -413,35 +415,40 @@ def Wf(W):
 
 def Lambdachi(H,Ls,Ll,chi,rho0,g):
     L0 = FCS(H,Ls,Ll,chi)
-    print(np.shape(L0))
+    #print(np.shape(L0))
     tole = 1E-6
     Draz0 = Drazinspectral(L0,tole)
     P0 = Prin(rho0,basis)
     Q0 = Qpart(rho0,P0)
     V0 = Inte(g)
     Vnu = pert(V0)
+    #Here we calculate a transition matrix W(\chi,t)
     W = ratem(L0,Draz0,P0,Q0,Vnu)
+    #here we transform it to matrix    
     W0 = Wf(W)
 
     #we diagonalize L(chi)
-    evals, evecs = eig(W0 )
+    evals, evecs = eig(W0)
     reals = []
     for re in evals:
+        #print(re)
         reals.append(re.real) 
     #We choose the index of the largest real part
     n = reals.index(max(reals))
     return evals[n]
 
 def Nl(H,Ls,Ll,rho0,g):
-    print("Ls")
-    print(np.shape(Ls))
-    print("Ll")
-    print(np.shape(Ll))
+    #print("Ls")
+    #print(np.shape(Ls))
+    #print("Ll")
+    #print(np.shape(Ll))
     #here we need to derivate around chi
     N = 10
     #here there is error
+
     #here we calculate the derivate of the largest real part
     chis = np.linspace(0,0.05,N)
+    #chis = np.linspace(0,0.20,N)
     Ss = []
     for chi in chis:
         L = Lambdachi(H,Ls,Ll,chi,rho0,g)
@@ -480,6 +487,7 @@ Il = []
 I2l = []
 gs= 5/1000
 for ev in eVs:
+    print(ev)
     mud0 = 2
     evn.append(ev*betal)
     U00 = 40 #10
@@ -494,8 +502,8 @@ for ev in eVs:
     Ls0 = Dissipator(E0,Ed0,U00,Uf0,ev/2,-ev/2,mud0,betal,betar,betad,gl,glU,gr,grU,gd,gdU)
     H0 = Htd(E0,Ed0,U00,Uf0)
     Ll = Dl(E0,U00,Uf0,ev/2,betal,gl,glU)
-    L0 = Liouvillian(H0,Ls0)
-    Il0,I2l0 = Nl(H0,L0,Ll,rho0,gs) 
+    #L0 = Liouvillian(H0,Ls0)
+    Il0,I2l0 = Nl(H0,Ls0,Ll,rho0,gs) 
     #print(Il0/gs)  
     #print(g)
     Il.append(Il0.real/gl)

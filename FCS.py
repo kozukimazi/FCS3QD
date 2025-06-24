@@ -163,8 +163,8 @@ Nd = np.matmul(dddag,dd)
 d = len(Ns)
 print(np.matmul(np.eye(d)-Nd,Nd))
 
-
-times = np.linspace(0,4000,200)
+#4000,200/8000,400
+times = np.linspace(0,16000,1200)
 Probnt1 = []
 Probnt2 = []
 Probnt4 = []
@@ -175,7 +175,7 @@ for ts in times:
     Probnt1.append(cal1.real)
     cal2 = DistL(H,Ls,Lr,Ll,rho0,ts,2)
     Probnt2.append(cal2.real)
-    cal4 = DistL(H,Ls,Lr,Ll,rho0,ts,3)
+    cal4 = DistL(H,Ls,Lr,Ll,rho0,ts,-1)
     Probnt4.append(cal4.real)
     calmin = DistL(H,Ls,Lr,Ll,rho0,ts,6)
     calt = cal1 + cal2 + cal4 + calmin
@@ -185,7 +185,7 @@ for ts in times:
 
 plt.scatter(times,Probnt1,label = "n=1")
 plt.scatter(times,Probnt2,label = "n=2")
-#plt.scatter(times,Probnt4, label = "n=3")
+plt.scatter(times,Probnt4, label = "n=-1")
 #plt.scatter(times,Probntmin,label = "n=6")
 #plt.scatter(times,ProbF,label = "ProbT")
 
