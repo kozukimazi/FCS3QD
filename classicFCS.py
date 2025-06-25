@@ -333,6 +333,7 @@ def ratem(L0,L0draz,P,Q,V):
      
     return Final 
 
+
 #######################################
 ##############base#####################
 #p000,p100,p010,p001,p110,p011,p101,p111
@@ -342,7 +343,7 @@ def ratem(L0,L0draz,P,Q,V):
 def ratel(W0l,Wl0,Wluf,Wufl,Wlu,Wul,Wu2l,Wlu2):
     ####base###
 
-    Wl = np.zeros((8,8))
+    Wl = np.zeros((8,8),dtype = np.complex_)
     #W0l
     Wl[0,0],Wl[0,1],Wl[1,0],Wl[1,1] = -Wl0,W0l,Wl0,-W0l
     #Wufl
@@ -356,7 +357,7 @@ def ratel(W0l,Wl0,Wluf,Wufl,Wlu,Wul,Wu2l,Wlu2):
 def rater(W0r,Wr0,Wruf,Wufr,Wru,Wur,Wu2r,Wru2):
     ####base###
 
-    Wr = np.zeros((8,8))
+    Wr = np.zeros((8,8), dtype = np.complex_)
     #W0r
     Wr[0,0],Wr[0,2],Wr[2,0],Wr[2,2] = -Wr0,W0r,Wr0,-W0r
     #Wufr
@@ -368,7 +369,7 @@ def rater(W0r,Wr0,Wruf,Wufr,Wru,Wur,Wu2r,Wru2):
     return Wr
 
 def rateg(Wlr,Wrl,Wlru,Wrlu):
-    Wcoup = np.zeros((8,8))
+    Wcoup = np.zeros((8,8),dtype = np.complex_)
     #Wlr
     Wcoup[1,1],Wcoup[1,2],Wcoup[2,1],Wcoup[2,2] = -Wrl,Wlr,Wrl,-Wlr
     #Wlru
@@ -376,7 +377,7 @@ def rateg(Wlr,Wrl,Wlru,Wrlu):
     return Wcoup
 
 def rateD(W0d,Wd0,Wru,Wur,Wlu,Wul,Wu2f,Wfu2):
-    Wd = np.zeros((8,8))
+    Wd = np.zeros((8,8),dtype = np.complex_)
     #W0d
     Wd[0,0],Wd[0,3],Wd[3,0],Wd[3,3] = -Wd0,W0d,Wd0,-W0d
     #Wufd
@@ -388,14 +389,14 @@ def rateD(W0d,Wd0,Wru,Wur,Wlu,Wul,Wu2f,Wfu2):
     return Wd
 
 def ratelr(Wl,Wr,Wlr):
-
+    
     return Wl+Wr+Wlr
 
 def ratet(Wl,Wr,Wlr,Wd):
 
     return Wl +Wr + Wlr + Wd
 
-#here ew have to modify, it has a imaginary part
+#here we have to modify, it has a imaginary part
 def Wf(W):
     W0l,Wl0,Wluf,Wufl = W[63,27],W[27,63],W[45,9],W[9,45]
     Wlu,Wul,Wlu2,Wu2l = W[54,18],W[18,54],W[36,0],W[0,36]
@@ -403,15 +404,59 @@ def Wf(W):
     W0r,Wr0,Wruf,Wufr = W[63,45],W[45,63],W[27,9],W[9,27]
     Wru,Wur,Wru2,Wu2r = W[54,36],W[36,54],W[18,0],W[0,18]
 
-    W0d,Wd0,Wfu2,Wu2f = W[63,54],W[54,63],W[0,9],W[9,0]
-    Wru,Wur,Wlu,Wul = W[45,36],W[36,45],W[27,18],W[18,27]    
+    W0d,Wd0,Wdfu2,Wdu2f = W[63,54],W[54,63],W[0,9],W[9,0]
+    Wdru,Wdur,Wdlu,Wdul = W[45,36],W[36,45],W[27,18],W[18,27]    
 
     Wlr,Wrl,Wlru,Wrlu = W[27,45],W[45,27],W[18,36],W[36,18]
     Wl = ratel(W0l,Wl0,Wluf,Wufl,Wlu,Wul,Wu2l,Wlu2)
     Wr = rater(W0r,Wr0,Wruf,Wufr,Wru,Wur,Wu2r,Wru2)
-    WLR = rateg(Wlr,Wrl,Wlru,Wrlu)
-    Wd = rateD(W0d,Wd0,Wru,Wur,Wlu,Wul,Wu2f,Wfu2)
-    return ratet(Wl,Wr,Wlr,Wd)
+    Wlr0 = rateg(Wlr,Wrl,Wlru,Wrlu)
+    Wd = rateD(W0d,Wd0,Wdru,Wdur,Wdlu,Wdul,Wdu2f,Wdfu2)
+    return ratet(Wl,Wr,Wlr0,Wd)
+
+#here we use explicit calculus of W
+def Wfchi(W,chi):
+    a = np.exp(-1j*chi)
+    b = np.exp(1j*chi)
+    W0l,Wl0,Wluf,Wufl = W[63,27]*a,W[27,63]*b,W[45,9]*a,W[9,45]*b
+    Wlu,Wul,Wlu2,Wu2l = W[54,18]*a,W[18,54]*b,W[36,0]*a,W[0,36]*b
+
+    W0r,Wr0,Wruf,Wufr = W[63,45],W[45,63],W[27,9],W[9,27]
+    Wru,Wur,Wru2,Wu2r = W[54,36],W[36,54],W[18,0],W[0,18]
+
+    W0d,Wd0,Wdfu2,Wdu2f = W[63,54],W[54,63],W[0,9],W[9,0]
+    Wdru,Wdur,Wdlu,Wdul = W[45,36],W[36,45],W[27,18],W[18,27]    
+
+    Wlr,Wrl,Wlru,Wrlu = W[27,45],W[45,27],W[18,36],W[36,18]
+    Wl = ratel(W0l,Wl0,Wluf,Wufl,Wlu,Wul,Wu2l,Wlu2)
+    Wr = rater(W0r,Wr0,Wruf,Wufr,Wru,Wur,Wu2r,Wru2)
+    Wlr0 = rateg(Wlr,Wrl,Wlru,Wrlu)
+    Wd = rateD(W0d,Wd0,Wdru,Wdur,Wdlu,Wdul,Wdu2f,Wdfu2)
+    return ratet(Wl,Wr,Wlr0,Wd)
+
+#New LambdaChi
+def Lambdachiw(H,Ls,chi,rho0,g):
+    L0 = Liouvillian(H,Ls)
+    #print(np.shape(L0))
+    tole = 1E-6
+    Draz0 = Drazinspectral(L0,tole)
+    P0 = Prin(rho0,basis)
+    Q0 = Qpart(rho0,P0)
+    V0 = Inte(g)
+    Vnu = pert(V0)
+    #Here we calculate a transition matrix W(\chi,t)
+    W = ratem(L0,Draz0,P0,Q0,Vnu)
+    print(W)
+    W0 = Wfchi(W,chi)
+    #we diagonalize L(chi)
+    evals, evecs = eig(W0)
+    reals = []
+    for re in evals:
+        #print(re)
+        reals.append(re.real) 
+    #We choose the index of the largest real part
+    n = reals.index(max(reals))
+    return evals[n]
 
 def Lambdachi(H,Ls,Ll,chi,rho0,g):
     L0 = FCS(H,Ls,Ll,chi)
@@ -458,6 +503,28 @@ def Nl(H,Ls,Ll,rho0,g):
     chisff,ddS = secondd(chis,Ss)
     return -1j*dS[0],-ddS[0]
 
+def NlW(H,Ls,rho0,g):
+    #print("Ls")
+    #print(np.shape(Ls))
+    #print("Ll")
+    #print(np.shape(Ll))
+    #here we need to derivate around chi
+    N = 10
+    #here there is error
+
+    #here we calculate the derivate of the largest real part
+    chis = np.linspace(0,0.05,N)
+    #chis = np.linspace(0,0.20,N)
+    Ss = []
+    for chi in chis:
+        L = Lambdachiw(H,Ls,chi,rho0,g)
+        #print(L.imag)
+        Ss.append(L)
+    chisf,dS = derivada(chis,Ss)
+    chisff,ddS = secondd(chis,Ss)
+    return -1j*dS[0],-ddS[0]
+
+
 def vecflow(W,p,Jn):
     return Jn.T@W@p
 
@@ -480,14 +547,14 @@ rho0 = np.array([[1/8,0,0,0,0,0,0,0],
                  [0,0,0,0,0,0,0,1/8]])
 
 
-Num = 2000 
+Num = 20 
 eVs = np.linspace(0,1000,Num)
 evn = []
 Il = []
 I2l = []
 gs= 5/1000
 for ev in eVs:
-    print(ev)
+    #print(ev)
     mud0 = 2
     evn.append(ev*betal)
     U00 = 40 #10
@@ -503,7 +570,8 @@ for ev in eVs:
     H0 = Htd(E0,Ed0,U00,Uf0)
     Ll = Dl(E0,U00,Uf0,ev/2,betal,gl,glU)
     #L0 = Liouvillian(H0,Ls0)
-    Il0,I2l0 = Nl(H0,Ls0,Ll,rho0,gs) 
+    #Il0,I2l0 = Nl(H0,Ls0,Ll,rho0,gs) 
+    Il0,I2l0 = NlW(H0,Ls0,rho0,gs)
     #print(Il0/gs)  
     #print(g)
     Il.append(Il0.real/gl)
