@@ -192,7 +192,7 @@ def Nl(H,Ls,Ll):
     Ss = []
     for chi in chis:
         L = Lambdachi(H,Ls,Ll,chi)
-        print(L.imag)
+        #print(L.imag)
         Ss.append(L)
     chisf,dS = derivada(chis,Ss)
     chisff,ddS = secondd(chis,Ss)
@@ -215,8 +215,8 @@ mul = eV/20
 
 betar,betad,betal = 1/100,5/10,1/100
 #datos maquina
-gr,grU = (1/100)*(1/2), 1/100
-gl,glU = 1/100, (1/100)*(1/2)
+gr,grU = (1/100)*(1/6), 1/100
+gl,glU = 1/100, (1/100)*(1/6)
 gd,gdU = 1/50,1/50 
 
 #revisar la base
@@ -235,14 +235,14 @@ rho0 = np.array([[1/8,0,0,0,0,0,0,0],
 
 
 #Num = 8000
-Num = 2000 
-eVs = np.linspace(0,1000,Num)
+Num = 200
+eVs = np.linspace(0,800,Num)
 evn = []
 Il = []
 I2l = []
 gs= 5/1000
 for ev in eVs:
-    print(ev)
+    #print(ev)
     evn.append(ev*betal)
     mud0 = 2
     U00 = 40 #10
@@ -263,8 +263,8 @@ for ev in eVs:
     Il0,I2l0 = Nl(H0,Ls0,Ll0) 
     #print(Il0/gs)  
     #print(g)
-    Il.append(Il0.real/gl)
-    I2l.append(I2l0.real/gl)
+    Il.append(Il0.real)
+    I2l.append(I2l0.real)
     #print(g)
 
 plt.plot( evn,Il)
@@ -289,7 +289,7 @@ Il0 = []
 I2l0 = []
 
 for g in gss:
-    print(g)
+    #print(g)
     mud0 = 2
     U00 = 40 #10
     #mud0 = 1-U00/2
