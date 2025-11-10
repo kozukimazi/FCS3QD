@@ -3,7 +3,7 @@ import cupy as cp
 import time
 
 # Matrix size (adjust to test performance)
-n = 16600
+n = 2800
 
 # Generate a random symmetric matrix (for real eigenvalues)
 A_cpu = np.random.rand(n, n)
