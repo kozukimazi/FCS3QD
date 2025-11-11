@@ -77,6 +77,40 @@ def quadrature(x1,y1):
         total += (x1[ns+1] - x1[ns])*(y1[ns+1] + y1[ns])*(1/2)
     return total 
 
+#####################################################
+############phononsection############################
+#####################################################
+def bose(omega,betaph):
+
+    n = 1/(np.exp(omega*betaph) - 1)
+    return n
+
+def Jph(omega,omegac,J0):
+    if (omega < 0):
+        return -J0*omega*np.exp(-abs(omega)/omegac)
+    else:
+        return J0*omega*np.exp(-abs(omega)/omegac)
+
+def gammaph(omega,omegac,J0,betaph):
+    #omegac = 1E-2
+    #gamma0 = 1
+    #J0 = 2
+    
+    if (abs(omega) > 1E-7):
+        
+        n = bose(omega,betaph)
+        #print("aqui tmbn")
+        if (omega > 0):
+        
+            rate =  Jph(omega,omegac,J0)*(n+1)
+        else:
+            rate = abs(Jph(abs(omega),omegac,J0)*n)
+        return rate
+        
+    else:
+        #print("valor:")
+        return J0/betaph 
+
 def Dl(E,U,Uf,mul,betal,gammal,gammalU):
     d = len(nl)
     auxl1 = np.sqrt( fermi(E,mul,betal)*gammal )*np.matmul( np.matmul((np.eye(d)-nr),(np.eye(d)-nd)),dldag )
@@ -115,11 +149,18 @@ def Dd(E,U,mud,betad,gammad,gammadU):
 
     return [auxd1,auxd2,auxd3,auxd4,auxd5,auxd6]
 
-def Dissipator(E,Ed,U,Uf,mul,mur,mud,betal,betar,betad,gammal,gammalU,gammar,gammarU,gammad,gammadU):
+def Dphonon(betaph,J0,omegac):
+    gam = gammaph(0,omegac,J0,betaph)
+    aux = np.sqrt(gam) *(np.matmul(dldag, dr) + np.matmul(drdag, dl))
+    return [aux]
+
+
+
+def Dissipator(E,Ed,U,Uf,mul,mur,mud,betal,betar,betad,betaph,gammal,gammalU,gammar,gammarU,gammad,gammadU,J0,omegac):
     DR = Dr(E,U,Uf,mur,betar,gammar,gammarU)
     DL = Dl(E,U,Uf,mul,betal,gammal,gammalU)
     DD = Dd(Ed,U,mud,betad,gammad,gammadU)
-
+    Dph = Dphonon(betaph,J0,omegac)
     tot = []
     for l in DL:
         tot.append(l)
@@ -128,6 +169,8 @@ def Dissipator(E,Ed,U,Uf,mul,mur,mud,betal,betar,betad,gammal,gammalU,gammar,gam
     for d in DD:
         tot.append(d)    
 
+    for p in Dph:
+        tot.append(p)
     return tot
 
 def Liouvillian( H,Ls, hbar = 1):
@@ -201,14 +244,16 @@ def Nl(H,Ls,Ll):
     chisff,ddS = secondd(chis,Ss)
     return -1j*dS[0],-ddS[0]
 
-def Nlnew(g0,params):
+def Nlnew(J0,params):
     E0,Ed0,U00,Uf0 = params["E0"],params["Ed0"],params["U00"],params["Uf0"]
     ev,mud0 = params["ev"],params["mud0"]
     betal,betar,betad = params["betal"],params["betar"],params["betad"]
     gl,glU = params["gl"],params["glU"]
     gr,grU = params["gr"],params["grU"]
     gd,gdU = params["gd"],params["gdU"]
-    Ls0 = Dissipator(E0,Ed0,U00,Uf0,ev/2,-ev/2,mud0,betal,betar,betad,gl,glU,gr,grU,gd,gdU)
+    g0,omegac = params["g0"],params["omegac"]
+    betaph = params["betaph"]
+    Ls0 = Dissipator(E0,Ed0,U00,Uf0,ev/2,-ev/2,mud0,betal,betar,betad,betaph,gl,glU,gr,grU,gd,gdU,J0,omegac)
     H0 = Hamiltonian(E0,Ed0,U00,Uf0,g0)
     
     Ll0 = Dl(E0,U00,Uf0,ev/2,betal,gl,glU)
@@ -243,8 +288,8 @@ def run_parallel():
     params = {
         "E0": 1.0,
         "Ed0": 2-20,
-        "U00": 0,
-        "Uf0": 40,
+        "U00": 40,
+        "Uf0": 500,
         "ev": 20,
         "mud0": 2,
         "betal": 1/100,
@@ -253,19 +298,21 @@ def run_parallel():
         "gl": 1/100, "glU": 1/600,
         "gr": 1/600, "grU": 1/100,
         "gd": 1/50, "gdU": 1/50,
+        "g0": 5/1000, "omegac": 1E-2,
+        "betaph": 1/400,
     }
 
     # -----------------------
     # Rango de voltajes ev a barrer
     # -----------------------
-    Num = 8000
-    g0s = np.linspace(0, 1, Num)
+    Num = 4000
+    J0s = np.logspace(-9, 3, Num)
 
     # -----------------------
     # Paralelización con Pool
     # -----------------------
     with mp.Pool(processes=mp.cpu_count()) as pool:
-        resultados = pool.starmap(Nlnew, [(g0, params) for g0 in g0s])
+        resultados = pool.starmap(Nlnew, [(J0, params) for J0 in J0s])
 
     # -----------------------
     # Separar los resultados en listas individuales
@@ -273,27 +320,30 @@ def run_parallel():
     Ilist = [r[0].real for r in resultados]  # -1j*dS[0]
     Slist = [r[1].real for r in resultados]  # -ddS[0]
 
-    return g0s, Ilist, Slist
+    return J0s, Ilist, Slist
 
 
 if __name__ == "__main__":
-    g0s, I, S = run_parallel()
-    np.savez("current_noise.npz", g0s=g0s, I=I, S=S)
+    J0s, I, S = run_parallel()
+    np.savez("current_noise.npz", J0s=J0s, I=I, S=S)
 
     gl = 1/100
-    n = len(g0s)
+    n = len(J0s)
+    betaph = 1/400
     gaux = []
     Il0 = []
     I2l0 = []
     for i in range(n):
-        gaux.append(g0s[i]/gl)
+        gaux.append(J0s[i]/(betaph*gl))
         Il0.append(I[i]/gl)
         I2l0.append(S[i]/gl)
 
     # graficar o guardar
     plt.plot(gaux, Il0, label="Current")
     plt.plot(gaux, I2l0, label="Noise")
-    plt.xlabel("g0/gam")
+    plt.xlabel(r'$J_{0}/(\beta_{ph}\gamma_{L})$',fontsize = 20)
+    plt.xticks(fontsize=17)  # X-axis tick labels
+    plt.yticks(fontsize=17)
+    plt.legend(fontsize=15,loc = "upper right")
     plt.xscale("log")
-    plt.legend()
     plt.show()
