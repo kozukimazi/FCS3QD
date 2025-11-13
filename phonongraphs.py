@@ -5,7 +5,7 @@ from scipy.linalg import eig
 from scipy import integrate
 from scipy.linalg import logm 
 
-data = np.load("current_noise.npz")
+data = np.load("current_noiseg=5_10^{-3}.npz")
 J0s, I, S = data["J0s"], data["I"], data["S"]
 
 gl = 1/100

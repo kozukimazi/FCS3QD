@@ -286,11 +286,11 @@ def run_parallel():
     # Diccionario de parámetros fijos
     # -----------------------
     params = {
-        "E0": 1.0,
+        "E0": 0,
         "Ed0": 2-20,
         "U00": 40,
         "Uf0": 500,
-        "ev": 20,
+        "ev": 100,
         "mud0": 2,
         "betal": 1/100,
         "betar": 1/100,
@@ -298,7 +298,7 @@ def run_parallel():
         "gl": 1/100, "glU": 1/600,
         "gr": 1/600, "grU": 1/100,
         "gd": 1/50, "gdU": 1/50,
-        "g0": 5/1000, "omegac": 1E-2,
+        "g0": 7/1000, "omegac": 1E-2,
         "betaph": 1/400,
     }
 
@@ -325,7 +325,7 @@ def run_parallel():
 
 if __name__ == "__main__":
     J0s, I, S = run_parallel()
-    np.savez("current_noise.npz", J0s=J0s, I=I, S=S)
+    np.savez("current_noiseg=7_10^{-3}.npz", J0s=J0s, I=I, S=S)
 
     gl = 1/100
     n = len(J0s)
