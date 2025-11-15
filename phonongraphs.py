@@ -14,17 +14,17 @@ J1s, I1, S1 = data1["J0s"], data1["I"], data1["S"]
 data2 = np.load("current_noiseg=5_10^{-3}.npz")
 J2s, I2, S2 = data2["J0s"], data2["I"], data2["S"]
 
-data3 = np.load("current_noiseg=7_10^{-3}.npz")
-J0s, I3, S3 = data3["J0s"], data3["I"], data3["S"]
+#data3 = np.load("current_noiseg=7_10^{-3}.npz")
+#J3s, I3, S3 = data3["evs"], data3["I"], data3["S"]
 
 data4 = np.load("current_noiseg=10^{-4}.npz")
-J0s, I4, S4 = data4["J0s"], data4["I"], data4["S"]
+J4s, I4, S4 = data4["J0s"], data4["I"], data4["S"]
 
 data5 = np.load("current_noiseg=5_10^{-4}.npz")
-J0s, I5, S5 = data5["J0s"], data5["I"], data5["S"]
+J5s, I5, S5 = data5["J0s"], data5["I"], data5["S"]
 
 data6 = np.load("current_noiseg=10^{-2}.npz")
-J0s, I6, S6 = data6["J0s"], data6["I"], data6["S"]
+J6s, I6, S6 = data6["J0s"], data6["I"], data6["S"]
 
 gl = 1/100
 n = len(J0s)
@@ -52,8 +52,8 @@ for i in range(n):
     I2l1.append(S1[i]/gl)
     Il2.append(I2[i]/gl)
     I2l2.append(S2[i]/gl)
-    Il3.append(I3[i]/gl)
-    I2l3.append(S3[i]/gl)
+    #Il3.append(I3[i]/gl)
+    #I2l3.append(S3[i]/gl)
     Il4.append(I4[i]/gl)
     I2l4.append(S4[i]/gl)
     Il5.append(I5[i]/gl)
@@ -68,7 +68,7 @@ for i in range(n):
 plt.plot(gaux, Il0, lw = 3, label=r'$g = 10^{-3}$')
 plt.plot(gaux, Il1, lw = 3,label=r'$g= 3 \times 10^{-3}$')
 plt.plot(gaux, Il2, lw = 3,label=r'$g = 5 \times 10^{-3}$')
-plt.plot(gaux, Il3, lw = 3,label=r'$g = 7 \times 10^{-3}$')
+#plt.plot(gaux, Il3, lw = 3,label=r'$g = 7 \times 10^{-3}$')
 plt.plot(gaux, Il4, lw = 3,label=r'$g = 10^{-4}$')
 plt.plot(gaux, Il5, lw = 3,label=r'$g = 5 \times 10^{-4}$')
 plt.plot(gaux, Il6, lw = 3,label=r'$g = 10^{-2}$')
@@ -84,7 +84,7 @@ plt.show()
 plt.plot(gaux, I2l0, lw = 3, label=r'$g = 10^{-3}$')
 plt.plot(gaux, I2l1, lw = 3,label=r'$g= 3 \times 10^{-3}$')
 plt.plot(gaux, I2l2, lw = 3,label=r'$g = 5 \times 10^{-3}$')
-plt.plot(gaux, I2l3, lw = 3,label=r'$g = 7 \times 10^{-3}$')
+#plt.plot(gaux, I2l3, lw = 3,label=r'$g = 7 \times 10^{-3}$')
 plt.plot(gaux, I2l4, lw = 3,label=r'$g = 10^{-4}$')
 plt.plot(gaux, I2l5, lw = 3,label=r'$g = 5 \times 10^{-4}$')
 plt.plot(gaux, I2l6, lw = 3,label=r'$g = 10^{-2}$')
